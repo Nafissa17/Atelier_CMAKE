@@ -1,20 +1,25 @@
 name: Automatisation des tests
 on: push
-
 jobs:
   Compilation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du dépôt
         uses: actions/checkout@v3
-
+      
+      - name: Installation des dépendances
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+      
       - name: Compilation
         run: |
           mkdir -p build
           cd build
           cmake ..
           make
-
+      
+      - name: Rendre le binaire exécutable
+        run: chmod +x build/src/calculator
+      
       - name: Upload du binaire
         uses: actions/upload-artifact@v3
         with:
@@ -27,16 +32,18 @@ jobs:
     steps:
       - name: Checkout du dépôt
         uses: actions/checkout@v3
-
+      
       - name: Download du binaire
         uses: actions/download-artifact@v3
         with:
           name: calculator-build
           path: build/src
-
+      
+      - name: Rendre le binaire exécutable
+        run: chmod +x build/src/calculator
+      
       - name: Test fonction add
-        run: |
-          ./build/src/calculator add 10 5
+        run: ./build/src/calculator add 10 5
 
   Test_Sub:
     runs-on: ubuntu-latest
@@ -47,6 +54,7 @@ jobs:
         with:
           name: calculator-build
           path: build/src
+      - run: chmod +x build/src/calculator
       - run: ./build/src/calculator sub 10 5
 
   Test_Mul:
@@ -58,6 +66,7 @@ jobs:
         with:
           name: calculator-build
           path: build/src
+      - run: chmod +x build/src/calculator
       - run: ./build/src/calculator mul 10 5
 
   Test_Div:
@@ -69,6 +78,7 @@ jobs:
         with:
           name: calculator-build
           path: build/src
+      - run: chmod +x build/src/calculator
       - run: ./build/src/calculator div 10 5
 
   Test_Car:
@@ -80,6 +90,7 @@ jobs:
         with:
           name: calculator-build
           path: build/src
+      - run: chmod +x build/src/calculator
       - run: ./build/src/calculator car 5
 
   Deploy:
