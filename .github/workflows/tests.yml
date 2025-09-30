@@ -14,6 +14,7 @@ jobs:
           cd build
           cmake ..
           make
+          echo "Compilation terminée"
 
       - name: Test fonction add
         run: |
