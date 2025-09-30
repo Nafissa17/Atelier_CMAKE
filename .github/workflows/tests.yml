@@ -1,63 +1,98 @@
 name: Automatisation des tests
 on: push
-
 jobs:
-  Compilation_et_Tests:
+  Compilation:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout du dépôt
-        uses: actions/checkout@v3
-
-      - name: Installation des dépendances
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake
-
       - name: Compilation
         run: |
-          # Créer un dossier temporaire pour la compilation
-          mkdir -p build
+          last_directory=$(basename ${{ runner.workspace }})
+          git clone https://github.com/${{ github.repository }}.git
+          cd ./$last_directory
+          mkdir build
           cd build
           cmake ..
           make
-
-          # Vérifier que le binaire existe
-          if [ -f "./calculator" ]; then
-            EXE="./calculator"
-          elif [ -f "../src/calculator" ]; then
-            EXE="../src/calculator"
-          else
-            echo "Erreur : binaire calculator introuvable"
-            exit 1
-          fi
-
-          # Afficher le binaire et rendre exécutable
-          echo "Binaire trouvé : $EXE"
-          chmod +x $EXE
-          # Sauvegarder le chemin pour les tests
-          echo "EXE_PATH=$EXE" >> $GITHUB_ENV
-          # Lister les fichiers pour debug
-          ls -R
-
-      - name: Test addition
+          make test  
+  Test_Add:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - name: Test fonction add
         run: |
-          $EXE add 10 5
-
-      - name: Test soustraction
+          last_directory=$(basename ${{ runner.workspace }})
+          git clone https://github.com/${{ github.repository }}.git
+          cd ./$last_directory
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ./src/calculator add 10 5
+  Test_Div:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - name: Test fonction div
         run: |
-          $EXE sub 10 5
-
-      - name: Test multiplication
+          last_directory=$(basename ${{ runner.workspace }})
+          git clone https://github.com/${{ github.repository }}.git
+          cd ./$last_directory
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ./src/calculator div 10 5
+  Test_mul:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - name: Test fonction mul
         run: |
-          $EXE mul 10 5
-
-      - name: Test division
+          last_directory=$(basename ${{ runner.workspace }})
+          git clone https://github.com/${{ github.repository }}.git
+          cd ./$last_directory
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ./src/calculator mul 10 5
+  Test_sub:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - name: Test fonction sub
         run: |
-          $EXE div 10 5
-
-      - name: Test car
+          last_directory=$(basename ${{ runner.workspace }})
+          git clone https://github.com/${{ github.repository }}.git
+          cd ./$last_directory
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ./src/calculator sub 10 5
+  Test_car:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - name: Test fonction car
         run: |
-          $EXE car 5 || echo "Commande 'car' non supportée"
-
-      - name: Déploiement
-        run: echo "Déploiement de la solution"
+          last_directory=$(basename ${{ runner.workspace }})
+          git clone https://github.com/${{ github.repository }}.git
+          cd ./$last_directory
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ./src/calculator car 5
+  Deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - Test_Add
+      - Test_Div
+      - Test_mul
+      - Test_sub
+      - Test_car
+    steps:
+      - name: Deploy
+        run: |
+          echo "Déploiement de la solution"
