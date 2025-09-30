@@ -4,65 +4,83 @@ on: push
 jobs:
   Compilation:
     runs-on: ubuntu-latest
-    outputs:
-      build-path: ${{ steps.build.outputs.build-path }}
     steps:
       - name: Checkout du dépôt
         uses: actions/checkout@v3
 
       - name: Compilation
-        id: build
         run: |
           mkdir -p build
           cd build
           cmake ..
           make
-  
+
+      - name: Upload du binaire
+        uses: actions/upload-artifact@v3
+        with:
+          name: calculator-build
+          path: build/src/calculator
 
   Test_Add:
     runs-on: ubuntu-latest
     needs: Compilation
     steps:
-      - uses: actions/checkout@v3
-      - run: |
-          cd build
-          ./src/calculator add 10 5
+      - name: Checkout du dépôt
+        uses: actions/checkout@v3
+
+      - name: Download du binaire
+        uses: actions/download-artifact@v3
+        with:
+          name: calculator-build
+          path: build/src
+
+      - name: Test fonction add
+        run: |
+          ./build/src/calculator add 10 5
 
   Test_Sub:
     runs-on: ubuntu-latest
     needs: Compilation
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          cd build
-          ./src/calculator sub 10 5
+      - uses: actions/download-artifact@v3
+        with:
+          name: calculator-build
+          path: build/src
+      - run: ./build/src/calculator sub 10 5
 
   Test_Mul:
     runs-on: ubuntu-latest
     needs: Compilation
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          cd build
-          ./src/calculator mul 10 5
+      - uses: actions/download-artifact@v3
+        with:
+          name: calculator-build
+          path: build/src
+      - run: ./build/src/calculator mul 10 5
 
   Test_Div:
     runs-on: ubuntu-latest
     needs: Compilation
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          cd build
-          ./src/calculator div 10 5
+      - uses: actions/download-artifact@v3
+        with:
+          name: calculator-build
+          path: build/src
+      - run: ./build/src/calculator div 10 5
 
   Test_Car:
     runs-on: ubuntu-latest
     needs: Compilation
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          cd build
-          ./src/calculator car 5
+      - uses: actions/download-artifact@v3
+        with:
+          name: calculator-build
+          path: build/src
+      - run: ./build/src/calculator car 5
 
   Deploy:
     runs-on: ubuntu-latest
