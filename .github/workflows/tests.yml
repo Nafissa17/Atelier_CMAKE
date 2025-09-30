@@ -2,82 +2,39 @@ name: Automatisation des tests
 on: push
 
 jobs:
-  Compilation:
+  Compilation_et_Tests:
     runs-on: ubuntu-latest
-    outputs:
-      build-path: ${{ steps.build.outputs.build-path }}
     steps:
       - name: Checkout du dépôt
         uses: actions/checkout@v3
 
       - name: Compilation
-        id: build
         run: |
-          mkdir -p build
-          cd build
-          cmake ..
+          cmake .
           make
-          # Exposer le chemin vers l'exécutable
-          echo "build-path=$(pwd)" >> $GITHUB_OUTPUT
+          echo "Fichiers compilés :"
+          find . -type f -executable -name "calculator*"  # Vérifie où se trouve le binaire
+          chmod +x src/calculator  # Mettre le binaire exécutable si nécessaire
 
-  Test_Add:
-    runs-on: ubuntu-latest
-    needs: Compilation
-    steps:
-      - uses: actions/checkout@v3
       - name: Test addition
         run: |
-          cd ${{ needs.Compilation.outputs.build-path }}
-          chmod +x src/calculator
           ./src/calculator add 10 5
 
-  Test_Sub:
-    runs-on: ubuntu-latest
-    needs: Compilation
-    steps:
-      - uses: actions/checkout@v3
       - name: Test soustraction
         run: |
-          cd ${{ needs.Compilation.outputs.build-path }}
-          chmod +x src/calculator
           ./src/calculator sub 10 5
 
-  Test_Mul:
-    runs-on: ubuntu-latest
-    needs: Compilation
-    steps:
-      - uses: actions/checkout@v3
       - name: Test multiplication
         run: |
-          cd ${{ needs.Compilation.outputs.build-path }}
-          chmod +x src/calculator
           ./src/calculator mul 10 5
 
-  Test_Div:
-    runs-on: ubuntu-latest
-    needs: Compilation
-    steps:
-      - uses: actions/checkout@v3
       - name: Test division
         run: |
-          cd ${{ needs.Compilation.outputs.build-path }}
-          chmod +x src/calculator
           ./src/calculator div 10 5
 
-  Test_Car:
-    runs-on: ubuntu-latest
-    needs: Compilation
-    steps:
-      - uses: actions/checkout@v3
-      - name: Test "car" (si implémenté)
+      - name: Test "car"
         run: |
-          cd ${{ needs.Compilation.outputs.build-path }}
-          chmod +x src/calculator
-          ./src/calculator car 5 || echo "Commande 'car' non supportée, test ignoré"
-
-  Deploy:
-    runs-on: ubuntu-latest
-    needs: [Test_Add, Test_Sub, Test_Mul, Test_Div, Test_Car]
-    steps:
-      - name: Déploiement de la solution
+          ./src/calculator car 5 || echo "Commande 'car' non supportée"
+          
+      - name: Déploiement
         run: echo "Déploiement de la solution"
