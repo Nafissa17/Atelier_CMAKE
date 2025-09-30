@@ -2,7 +2,7 @@ name: Automatisation des tests
 on: push
 
 jobs:
-  Compilation:
+  Compilation: 
     runs-on: ubuntu-latest
     outputs:
       exe-path: ${{ steps.build.outputs.exe-path }}
