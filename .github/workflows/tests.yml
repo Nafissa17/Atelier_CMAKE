@@ -2,39 +2,78 @@ name: Automatisation des tests
 on: push
 
 jobs:
-  Compilation_et_Tests:
+  Compilation:
     runs-on: ubuntu-latest
+    outputs:
+      exe-path: ${{ steps.build.outputs.exe-path }}
     steps:
       - name: Checkout du dépôt
         uses: actions/checkout@v3
 
       - name: Compilation
+        id: build
         run: |
           cmake .
           make
-          echo "Fichiers compilés :"
-          find . -type f -executable -name "calculator*"  # Vérifie où se trouve le binaire
-          chmod +x src/calculator  # Mettre le binaire exécutable si nécessaire
+          # Vérifier où se trouve le binaire
+          if [ -f "./src/calculator" ]; then
+            echo "exe-path=./src/calculator" >> $GITHUB_OUTPUT
+          elif [ -f "./calculator" ]; then
+            echo "exe-path=./calculator" >> $GITHUB_OUTPUT
+          else
+            echo "Erreur : binaire calculator introuvable"
+            exit 1
+          fi
+          chmod +x ${{ steps.build.outputs.exe-path }}
 
+  Test_Add:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - uses: actions/checkout@v3
       - name: Test addition
         run: |
-          ./src/calculator add 10 5
+          ${{ needs.Compilation.outputs.exe-path }} add 10 5
 
+  Test_Sub:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - uses: actions/checkout@v3
       - name: Test soustraction
         run: |
-          ./src/calculator sub 10 5
+          ${{ needs.Compilation.outputs.exe-path }} sub 10 5
 
+  Test_Mul:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - uses: actions/checkout@v3
       - name: Test multiplication
         run: |
-          ./src/calculator mul 10 5
+          ${{ needs.Compilation.outputs.exe-path }} mul 10 5
 
+  Test_Div:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - uses: actions/checkout@v3
       - name: Test division
         run: |
-          ./src/calculator div 10 5
+          ${{ needs.Compilation.outputs.exe-path }} div 10 5
 
-      - name: Test "car"
+  Test_Car:
+    runs-on: ubuntu-latest
+    needs: Compilation
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test "car" (si implémenté)
         run: |
-          ./src/calculator car 5 || echo "Commande 'car' non supportée"
-          
-      - name: Déploiement
+          ${{ needs.Compilation.outputs.exe-path }} car 5 || echo "Commande 'car' non supportée"
+
+  Deploy:
+    runs-on: ubuntu-latest
+    needs: [Test_Add, Test_Sub, Test_Mul, Test_Div, Test_Car]
+    steps:
+      - name: Déploiement de la solution
         run: echo "Déploiement de la solution"
