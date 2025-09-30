@@ -15,11 +15,13 @@ jobs:
         run: |
           cmake .
           make
-          # Vérifier où se trouve le binaire
-          if [ -f "./src/calculator" ]; then
-            echo "exe-path=./src/calculator" >> $GITHUB_OUTPUT
-          elif [ -f "./calculator" ]; then
+          echo "Fichiers générés après compilation :"
+          ls -R
+          # Détecter où se trouve le binaire
+          if [ -f "./calculator" ]; then
             echo "exe-path=./calculator" >> $GITHUB_OUTPUT
+          elif [ -f "./src/calculator" ]; then
+            echo "exe-path=./src/calculator" >> $GITHUB_OUTPUT
           else
             echo "Erreur : binaire calculator introuvable"
             exit 1
